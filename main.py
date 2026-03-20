@@ -4,7 +4,7 @@ import pandas as pd
 data = pd.read_csv("dataset/malicious_phish.csv")
 
 # Step 2: Reduce size (keep it manageable)
-data = data.sample(20000)
+data = data.sample(20000, random_state=42)
 
 # Step 3: Convert labels
 # benign → 0 (safe)
@@ -69,7 +69,7 @@ print("Testing set size:", X_test.shape)
 
 from sklearn.linear_model import LogisticRegression
 
-model = LogisticRegression()
+model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 
 # Step 9: Predict
@@ -82,3 +82,13 @@ from sklearn.metrics import accuracy_score
 
 accuracy = accuracy_score(y_test, y_pred)
 print("Model Accuracy:", accuracy)
+
+# Step 11: Detailed evaluation
+
+from sklearn.metrics import classification_report, confusion_matrix
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
