@@ -52,3 +52,15 @@ print(X.head())
 
 print("\nLabels (y):")
 print(y.head())
+
+# Step 7: Train-test split
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Check
+print("Training set size:", X_train.shape)
+print("Testing set size:", X_test.shape)
