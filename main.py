@@ -64,3 +64,21 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Check
 print("Training set size:", X_train.shape)
 print("Testing set size:", X_test.shape)
+
+# Step 8: Train model
+
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Step 9: Predict
+
+y_pred = model.predict(X_test)
+
+# Step 10: Check accuracy
+
+from sklearn.metrics import accuracy_score
+
+accuracy = accuracy_score(y_test, y_pred)
+print("Model Accuracy:", accuracy)
