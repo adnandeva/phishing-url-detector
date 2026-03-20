@@ -42,17 +42,45 @@ model = load_model()
 
 # Predict button
 if st.button("Check URL"):
-    
+
     if url_input:
         if not url_input.startswith("http"):
             url_input = "http://" + url_input
 
-        features = extract_features(url_input) 
+        # Extract features
+        features = extract_features(url_input)
         df = pd.DataFrame([features])
 
+        # Prediction
         prediction = model.predict(df)[0]
+        probability = model.predict_proba(df)[0][1]  # phishing probability
 
+        # Display result
         if prediction == 1:
             st.error("⚠️ This URL is likely PHISHING")
         else:
             st.success("✅ This URL looks SAFE")
+
+        # Show probability
+        st.subheader("Confidence Score")
+        st.progress(int(probability * 100))
+        st.write(f"Phishing Probability: {probability:.2f}")
+
+        # Basic explanation
+        st.subheader("Why this result?")
+
+        reasons = []
+        if features['num_digits'] > 5:
+            reasons.append("Contains many digits")
+        if features['num_special'] > 10:
+            reasons.append("Contains many special characters")
+        if features['num_dots'] > 3:
+            reasons.append("Too many dots (suspicious structure)")
+        if features['url_length'] > 75:
+            reasons.append("URL is unusually long")
+
+        if reasons:
+            for r in reasons:
+                st.write(f"- {r}")
+        else:
+            st.write("No obvious suspicious patterns detected")
