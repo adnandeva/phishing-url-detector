@@ -1,15 +1,18 @@
 import streamlit as st
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+import joblib
 
-# Title
-st.title("Phishing URL Detector")
+# Title and caption
+st.title("🔐 Phishing URL Detector")
+st.caption("Check if a URL is safe or potentially malicious using machine learning")
 
 # Input box
-url_input = st.text_input("Enter a URL:")
+url_input = st.text_input(
+    "Enter a URL",
+    placeholder="e.g. https://google.com"
+)
 
 # Feature extraction
-
 def extract_features(url):
     return {
         'url_length': len(url),
@@ -17,50 +20,49 @@ def extract_features(url):
         'has_https': 1 if url.startswith("https") else 0,
         'num_digits': sum(c.isdigit() for c in url),
         'num_special': sum(not c.isalnum() for c in url),
-
-        # NEW FEATURES
         'has_ip': 1 if any(char.isdigit() for char in url.split('/')[0]) else 0,
         'num_subdomains': url.count('.') - 1,
         'has_suspicious_words': 1 if any(word in url.lower() for word in ['login', 'verify', 'account', 'secure', 'update']) else 0
     }
 
-# Load model (no training anymore)
-import joblib
-
+# Load model
 @st.cache_resource
 def load_model():
     return joblib.load("model.pkl")
 
 model = load_model()
 
-# Predict button
+# Button
+check = st.button("🔍 Analyze URL")
 
-if st.button("Check URL"):
-
+if check:
     if url_input:
+
         if not url_input.startswith("http"):
             url_input = "http://" + url_input
 
-        # Extract features
-        features = extract_features(url_input)
-        df = pd.DataFrame([features])
+        with st.spinner("Analyzing URL..."):
 
-        # Prediction
-        prediction = model.predict(df)[0]
-        probability = model.predict_proba(df)[0][1]  # phishing probability
+            # Extract features
+            features = extract_features(url_input)
+            df = pd.DataFrame([features])
 
-        # Display result
+            # Prediction
+            prediction = model.predict(df)[0]
+            probability = model.predict_proba(df)[0][1]
+
+        # Result
         if prediction == 1:
-            st.error("⚠️ This URL is likely PHISHING")
+            st.error("🚨 This URL is likely PHISHING")
         else:
             st.success("✅ This URL looks SAFE")
 
-        # Show probability
-        st.subheader("Confidence Score")
-        st.progress(int(probability * 100))
-        st.write(f"Phishing Probability: {probability:.2f}")
+        # Confidence
+        st.subheader("Confidence")
+        st.progress(probability)
+        st.write(f"{probability*100:.1f}% chance of phishing")
 
-        # Basic explanation
+        # Explanation
         st.subheader("Why this result?")
 
         reasons = []
@@ -69,12 +71,13 @@ if st.button("Check URL"):
         if features['num_special'] > 10:
             reasons.append("Contains many special characters")
         if features['num_dots'] > 3:
-            reasons.append("Too many dots (suspicious structure)")
+            reasons.append("Too many dots")
         if features['url_length'] > 75:
             reasons.append("URL is unusually long")
 
         if reasons:
+            st.markdown("**Detected patterns:**")
             for r in reasons:
-                st.write(f"- {r}")
+                st.write(f"• {r}")
         else:
-            st.write("No obvious suspicious patterns detected")
+            st.write("No strong suspicious patterns detected")
