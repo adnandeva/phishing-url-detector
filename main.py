@@ -92,11 +92,11 @@ print("Model Accuracy:", accuracy)
 
 from sklearn.metrics import classification_report, confusion_matrix
 
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
+#print("\nClassification Report:")
+#print(classification_report(y_test, y_pred))
 
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
+#print("\nConfusion Matrix:")
+#print(confusion_matrix(y_test, y_pred))
 
 # Step 12: Random Forest model
 
@@ -112,8 +112,30 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 rf_accuracy = accuracy_score(y_test, rf_pred)
 print("\nRandom Forest Accuracy:", rf_accuracy)
 
-print("\nRandom Forest Classification Report:")
-print(classification_report(y_test, rf_pred))
+#print("\nRandom Forest Classification Report:")
+#print(classification_report(y_test, rf_pred))
 
-print("\nRandom Forest Confusion Matrix:")
-print(confusion_matrix(y_test, rf_pred))
+#print("\nRandom Forest Confusion Matrix:")
+#print(confusion_matrix(y_test, rf_pred))
+
+# Step 13: Decision Tree model
+
+from sklearn.tree import DecisionTreeClassifier
+
+dt = DecisionTreeClassifier(random_state=42)
+dt.fit(X_train, y_train)
+
+y_pred_dt = dt.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+print("\nDecision Tree Accuracy:", accuracy_score(y_test, y_pred_dt))
+
+# Step 14: Feature Importance
+
+print("\nFeature Importance:")
+
+feature_names = X.columns
+importances = rf_model.feature_importances_
+
+for name, score in zip(feature_names, importances):
+    print(f"{name}: {score:.4f}")
