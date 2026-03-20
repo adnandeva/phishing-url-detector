@@ -81,3 +81,7 @@ if check:
                 st.write(f"• {r}")
         else:
             st.write("No strong suspicious patterns detected")
+
+        # Author
+        st.markdown("---")
+        st.caption("Built by Adnan Riyaz")
