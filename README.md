@@ -1,7 +1,9 @@
 # Phishing URL Detection using Lexical Analysis
 
+
 ## Overview
 This project detects whether a URL is legitimate or malicious using lexical features extracted directly from the URL string. This approach does not require accessing webpage content, making it fast and lightweight. This makes the system efficient and suitable for real-time detection scenarios.
+
 
 ## How it Works
 - URLs are loaded from a labeled dataset  
@@ -13,17 +15,21 @@ This project detects whether a URL is legitimate or malicious using lexical feat
   - Number of digits  
   - Special characters  
 
+
 ## Tech Stack
 - Python (Pandas for data processing)
+  
 
 ## Project Status
 Preprocessing and feature extraction completed.  
 Model training will be added next.
 
+
 ## Future Improvements
 - Train and evaluate machine learning models  
 - Improve feature engineering  
-- Add real-time URL prediction  
+- Add real-time URL prediction
+  
 
 ## Author
 Adnan Riyaz – Computer Science Student
