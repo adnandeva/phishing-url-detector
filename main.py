@@ -15,8 +15,8 @@ data['label'] = data['type'].apply(lambda x: 0 if x == 'benign' else 1)
 data = data[['url', 'label']]
 
 # Check output
-#print(data.head())
-#print(data.shape)
+print(data.head())
+print(data.shape)
 
 # Step 5: Feature extraction
 
@@ -40,3 +40,15 @@ final_data = pd.concat([features_df, data['label']], axis=1)
 
 print(final_data.head())
 print(final_data.shape)
+
+# Step 6: Separate features and label
+
+X = final_data.drop('label', axis=1)
+y = final_data['label']
+
+# Check
+print("Features (X):")
+print(X.head())
+
+print("\nLabels (y):")
+print(y.head())
