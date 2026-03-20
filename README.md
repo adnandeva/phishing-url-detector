@@ -13,7 +13,7 @@ This project detects whether a URL is legitimate or malicious using lexical feat
   - Number of dots  
   - Presence of HTTPS  
   - Number of digits  
-  - Special characters  
+  - Special characters
 
 
 ## Tech Stack
