@@ -1,35 +1,66 @@
-# Phishing URL Detection using Lexical Analysis
-
+# Phishing URL Detection using Machine Learning
 
 ## Overview
-This project detects whether a URL is legitimate or malicious using lexical features extracted directly from the URL string. This approach does not require accessing webpage content, making it fast and lightweight. This makes the system efficient and suitable for real-time detection scenarios.
+This project detects whether a URL is legitimate or phishing using machine learning. It uses lexical features extracted directly from the URL, making it fast and lightweight without needing to access webpage content.
 
+---
 
-## How it Works
-- URLs are loaded from a labeled dataset  
-- Labels are converted into binary (0 = legit, 1 = malicious)
-- Lexical features are extracted from URLs:
-  - URL length  
-  - Number of dots  
-  - Presence of HTTPS  
-  - Number of digits  
-  - Special characters
+## Features
+- URL length
+- Number of dots
+- Number of digits
+- Number of special characters
+- HTTPS presence
 
+---
+
+## Models Used
+- Logistic Regression (baseline)
+- Random Forest (improved performance)
+
+---
+
+## Results
+- Logistic Regression Accuracy: ~72%
+- Random Forest Accuracy: ~85%
+
+Random Forest significantly improves phishing detection performance, especially recall for malicious URLs.
+
+---
 
 ## Tech Stack
-- Python (Pandas for data processing)
-  
+- Python
+- Pandas (data processing)
+- Scikit-learn (machine learning)
+- Streamlit (UI)
 
-## Project Status
-Preprocessing and feature extraction completed.  
-Model training will be added next.
+---
 
+## How to Run
 
-## Future Improvements
-- Train and evaluate machine learning models  
-- Improve feature engineering  
-- Add real-time URL prediction
-  
+1. Clone the repository  
+```bash
+git clone https://github.com/adnandeva/phishing-url-detector.git
+cd phishing-url-detector
+```
+
+2. Create a virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+3.	Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+4.	Run the app
+```bash
+streamlit run app.py
+```
+
+---
 
 ## Author
 Adnan Riyaz – Computer Science Student
