@@ -15,8 +15,8 @@ data['label'] = data['type'].apply(lambda x: 0 if x == 'benign' else 1)
 data = data[['url', 'label']]
 
 # Check output
-print(data.head())
-print(data.shape)
+#print(data.head())
+#print(data.shape)
 
 # Step 5: Feature extraction
 
@@ -24,7 +24,7 @@ def extract_features(url):
     return {
         'url_length': len(url),
         'num_dots': url.count('.'),
-        'has_https': 1 if 'https' in url else 0,
+        'has_https': 1 if url.startswith("https") else 0,
         'num_digits': sum(c.isdigit() for c in url),
         'num_special': sum(not c.isalnum() for c in url)
     }
@@ -38,8 +38,8 @@ features_df = pd.DataFrame(list(features), index=data.index)
 # Combine with labels
 final_data = pd.concat([features_df, data['label']], axis=1)
 
-print(final_data.head())
-print(final_data.shape)
+#print(final_data.head())
+#print(final_data.shape)
 
 # Step 6: Separate features and label
 
@@ -47,11 +47,11 @@ X = final_data.drop('label', axis=1)
 y = final_data['label']
 
 # Check
-print("Features (X):")
-print(X.head())
+#print("Features (X):")
+#print(X.head())
 
-print("\nLabels (y):")
-print(y.head())
+#print("\nLabels (y):")
+#print(y.head())
 
 # Step 7: Train-test split
 
@@ -62,8 +62,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # Check
-print("Training set size:", X_train.shape)
-print("Testing set size:", X_test.shape)
+#print("Training set size:", X_train.shape)
+#print("Testing set size:", X_test.shape)
 
 # Step 8: Train model
 
