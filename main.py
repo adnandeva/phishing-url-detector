@@ -98,15 +98,19 @@ from sklearn.metrics import classification_report, confusion_matrix
 #print("\nConfusion Matrix:")
 #print(confusion_matrix(y_test, y_pred))
 
-# Step 12: Random Forest model
+# Step 12: Random Forest model (tuned + balanced)
 
 from sklearn.ensemble import RandomForestClassifier
 
 rf_model = RandomForestClassifier(
-    n_estimators=100,
-    random_state=42,
-    class_weight='balanced'
+    n_estimators=200,        # more trees = better learning
+    max_depth=15,            # prevent overfitting
+    min_samples_split=5,     # avoid overly specific splits
+    min_samples_leaf=2,      # smoother decisions
+    class_weight='balanced',
+    random_state=42
 )
+
 rf_model.fit(X_train, y_train)
 
 rf_pred = rf_model.predict(X_test)
@@ -143,4 +147,5 @@ importances = rf_model.feature_importances_
 
 for name, score in zip(feature_names, importances):
     print(f"{name}: {score:.4f}")
+
 
