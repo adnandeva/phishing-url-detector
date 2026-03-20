@@ -148,4 +148,11 @@ importances = rf_model.feature_importances_
 for name, score in zip(feature_names, importances):
     print(f"{name}: {score:.4f}")
 
+# Step 15: Save trained model
+
+import joblib
+
+joblib.dump(rf_model, "model.pkl")
+print("Model saved as model.pkl")
+
 

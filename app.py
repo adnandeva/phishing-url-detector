@@ -8,35 +8,28 @@ st.title("Phishing URL Detector")
 # Input box
 url_input = st.text_input("Enter a URL:")
 
-# Feature extraction function
+# Feature extraction
+
 def extract_features(url):
     return {
         'url_length': len(url),
         'num_dots': url.count('.'),
         'has_https': 1 if url.startswith("https") else 0,
         'num_digits': sum(c.isdigit() for c in url),
-        'num_special': sum(not c.isalnum() for c in url)
+        'num_special': sum(not c.isalnum() for c in url),
+
+        # NEW FEATURES
+        'has_ip': 1 if any(char.isdigit() for char in url.split('/')[0]) else 0,
+        'num_subdomains': url.count('.') - 1,
+        'has_suspicious_words': 1 if any(word in url.lower() for word in ['login', 'verify', 'account', 'secure', 'update']) else 0
     }
 
-# Load and train model (same logic)
-@st.cache_data
+# Load model (no training anymore)
+import joblib
+
+@st.cache_resource
 def load_model():
-    data = pd.read_csv("dataset/malicious_phish.csv")
-    data = data.sample(20000, random_state=42)
-    data['label'] = data['type'].apply(lambda x: 0 if x == 'benign' else 1)
-    data = data[['url', 'label']]
-
-    features = data['url'].apply(extract_features)
-    features_df = pd.DataFrame(list(features), index=data.index)
-    final_data = pd.concat([features_df, data['label']], axis=1)
-
-    X = final_data.drop('label', axis=1)
-    y = final_data['label']
-
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X, y)
-
-    return model
+    return joblib.load("model.pkl")
 
 model = load_model()
 
