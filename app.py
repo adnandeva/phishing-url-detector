@@ -84,4 +84,4 @@ if check:
 
         # Author
         st.markdown("---")
-        st.caption("Built by Adnan Riyaz")
+        st.caption("Built by Adnan")
