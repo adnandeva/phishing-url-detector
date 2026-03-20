@@ -26,7 +26,12 @@ def extract_features(url):
         'num_dots': url.count('.'),
         'has_https': 1 if url.startswith("https") else 0,
         'num_digits': sum(c.isdigit() for c in url),
-        'num_special': sum(not c.isalnum() for c in url)
+        'num_special': sum(not c.isalnum() for c in url),
+
+        # NEW FEATURES
+        'has_ip': 1 if any(char.isdigit() for char in url.split('/')[0]) else 0,
+        'num_subdomains': url.count('.') - 1,
+        'has_suspicious_words': 1 if any(word in url.lower() for word in ['login', 'verify', 'account', 'secure', 'update']) else 0
     }
 
 # Apply feature extraction

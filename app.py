@@ -41,6 +41,7 @@ def load_model():
 model = load_model()
 
 # Predict button
+
 if st.button("Check URL"):
 
     if url_input:
