@@ -96,13 +96,28 @@ Added advanced lexical features including:
 Integrated whitelist support for trusted domains such as:
 
 - Google
+
 - Microsoft
+
 - GitHub
+
 - Apple
+
 - Amazon
+
 - NASA
 
-This helps prevent legitimate domains from being falsely classified as phishing URLs.
+The detector also supports trusted educational and government TLDs including:
+
+- `.edu`
+
+- `.gov`
+
+- `.gov.in`
+
+- `.ac.in`
+
+This significantly reduces false positives for legitimate university, educational, and government portals.
 
 ### ✅ Enhanced Streamlit UI
 
@@ -113,6 +128,7 @@ Added:
 - Cleaner prediction feedback
 - URL normalization support
 - Real-time phishing probability display
+- Trusted TLD based validation
 
 ---
 
@@ -207,6 +223,7 @@ https://google.com
 https://github.com
 https://support.microsoft.com
 https://www.apple.com
+https://ruasportal.msruas.ac.in
 ```
 
 ### 🚨 Phishing-like URLs
@@ -227,6 +244,7 @@ http://192.168.1.5/login.php
 - SHAP explainability
 - Improved UI/UX
 - Live blacklist integration
+- DNS reputation analysis
 
 ---
 
@@ -249,5 +267,8 @@ This project was built for learning, experimentation, and improving practical un
 - Machine Learning deployment
 - Streamlit application development
 
-Because apparently humans now need machine learning to tell them that  
-`google-login-secure-paypal-free-money.xyz` might be suspicious.
+Because apparently the modern internet needed a machine learning model to explain why  
+
+`google-login-secure-paypal-free-money.xyz`
+
+might not be trustworthy.
