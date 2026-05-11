@@ -23,11 +23,11 @@ data = pd.read_csv(
     "dataset/phishing_url_dataset_unique.csv"
 )
 
-# Keep only required columns
+# Keep required columns
 
 data = data[['url', 'label']]
 
-# Remove missing values
+# Remove missing rows
 
 data = data.dropna(
     subset=['url', 'label']
@@ -46,7 +46,7 @@ data = data.dropna(
     subset=['label']
 )
 
-# Convert label to integer
+# Convert labels to integer
 
 data['label'] = data['label'].astype(int)
 
@@ -57,7 +57,7 @@ data = data.sample(
     random_state=42
 ).reset_index(drop=True)
 
-# Use subset for faster training
+# Faster training subset
 
 data = data.sample(
     20000,
@@ -77,29 +77,17 @@ def extract_features(url):
     suspicious_words = [
 
         'login',
-
         'verify',
-
         'account',
-
         'secure',
-
         'update',
-
         'bank',
-
         'signin',
-
         'password',
-
         'confirm',
-
         'wallet',
-
         'crypto',
-
         'paypal'
-
     ]
 
     ip_pattern = r'(\d{1,3}\.){3}\d{1,3}'
@@ -133,11 +121,8 @@ def extract_features(url):
         ),
 
         'has_suspicious_words': 1 if any(
-
             word in url.lower()
-
             for word in suspicious_words
-
         ) else 0,
 
         'uses_https': 1 if parsed.scheme == 'https' else 0
@@ -159,8 +144,6 @@ features_df = pd.DataFrame(
     feature_rows
 )
 
-# Reset indexes BEFORE concat
-
 features_df = features_df.reset_index(
     drop=True
 )
@@ -169,19 +152,15 @@ labels_df = data[['label']].reset_index(
     drop=True
 )
 
-# Combine safely
-
 final_data = pd.concat(
     [features_df, labels_df],
     axis=1
 )
 
-# Final NaN cleanup
-
 final_data = final_data.dropna()
 
 # =========================
-# SPLIT FEATURES & LABELS
+# SPLIT DATA
 # =========================
 
 X = final_data.drop(
@@ -190,10 +169,6 @@ X = final_data.drop(
 )
 
 y = final_data['label']
-
-# =========================
-# TRAIN TEST SPLIT
-# =========================
 
 X_train, X_test, y_train, y_test = train_test_split(
 

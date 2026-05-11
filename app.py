@@ -10,8 +10,11 @@ from urllib.parse import urlparse
 # =========================
 
 st.set_page_config(
+
     page_title="Phishing URL Detector",
+
     page_icon="🔐",
+
     layout="centered"
 )
 
@@ -22,20 +25,21 @@ st.set_page_config(
 TRUSTED_DOMAINS = [
 
     'google.com',
-
     'github.com',
-
     'amazon.com',
-
     'microsoft.com',
-
     'apple.com',
-
     'linkedin.com',
-
     'youtube.com',
-
     'nasa.gov'
+]
+
+TRUSTED_TLDS = [
+
+    '.gov',
+    '.gov.in',
+    '.edu',
+    '.ac.in'
 ]
 
 # =========================
@@ -69,7 +73,18 @@ def is_trusted_domain(url):
         ''
     )
 
-    return domain in TRUSTED_DOMAINS
+    if domain in TRUSTED_DOMAINS:
+
+        return True
+
+    if any(
+        domain.endswith(tld)
+        for tld in TRUSTED_TLDS
+    ):
+
+        return True
+
+    return False
 
 # =========================
 # FEATURE EXTRACTION
@@ -84,27 +99,16 @@ def extract_features(url):
     suspicious_words = [
 
         'login',
-
         'verify',
-
         'account',
-
         'secure',
-
         'update',
-
         'bank',
-
         'signin',
-
         'password',
-
         'confirm',
-
         'wallet',
-
         'crypto',
-
         'paypal'
     ]
 
@@ -139,11 +143,8 @@ def extract_features(url):
         ),
 
         'has_suspicious_words': 1 if any(
-
             word in url.lower()
-
             for word in suspicious_words
-
         ) else 0,
 
         'uses_https': 1 if parsed.scheme == 'https' else 0
@@ -195,7 +196,7 @@ if analyze:
             url_input
         )
 
-        # Trusted whitelist
+        # Trusted domains
 
         if is_trusted_domain(
             url_input
@@ -233,8 +234,6 @@ if analyze:
 
                 probability = model.predict_proba(df)[0][1]
 
-            # Result
-
             if prediction == 1:
 
                 st.error(
@@ -261,7 +260,7 @@ if analyze:
                 f"{probability * 100:.2f}% phishing probability"
             )
 
-            # Analysis
+            # Indicators
 
             st.subheader(
                 "Detected Indicators"
@@ -293,7 +292,7 @@ if analyze:
                     "Contains excessive special characters"
                 )
 
-            if features['num_dots'] > 3:
+            if features['num_dots'] > 5:
 
                 reasons.append(
                     "Contains many subdomains/dots"
