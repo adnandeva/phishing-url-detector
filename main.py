@@ -2,10 +2,13 @@ import re
 import joblib
 import pandas as pd
 
+from urllib.parse import urlparse
+
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -13,23 +16,53 @@ from sklearn.metrics import (
 )
 
 # =========================
-# DATA LOADING
+# LOAD DATASET
 # =========================
 
-data = pd.read_csv("dataset/malicious_phish.csv")
-
-# Reduce dataset size for faster training
-data = data.sample(20000, random_state=42)
-
-# Convert labels:
-# benign -> 0 (safe)
-# others -> 1 (malicious)
-data['label'] = data['type'].apply(
-    lambda x: 0 if x == 'benign' else 1
+data = pd.read_csv(
+    "dataset/phishing_url_dataset_unique.csv"
 )
 
 # Keep only required columns
+
 data = data[['url', 'label']]
+
+# Remove missing values
+
+data = data.dropna(
+    subset=['url', 'label']
+)
+
+# Convert labels safely
+
+data['label'] = pd.to_numeric(
+    data['label'],
+    errors='coerce'
+)
+
+# Remove invalid labels
+
+data = data.dropna(
+    subset=['label']
+)
+
+# Convert label to integer
+
+data['label'] = data['label'].astype(int)
+
+# Shuffle dataset
+
+data = data.sample(
+    frac=1,
+    random_state=42
+).reset_index(drop=True)
+
+# Use subset for faster training
+
+data = data.sample(
+    20000,
+    random_state=42
+).reset_index(drop=True)
 
 # =========================
 # FEATURE EXTRACTION
@@ -37,130 +70,255 @@ data = data[['url', 'label']]
 
 def extract_features(url):
 
-    # Detect IP-based URLs
-    ip_pattern = r'\d+\.\d+\.\d+\.\d+'
-    has_ip = 1 if re.search(ip_pattern, url) else 0
+    parsed = urlparse(url)
 
-    # Suspicious phishing keywords
+    hostname = parsed.netloc.lower()
+
     suspicious_words = [
+
         'login',
+
         'verify',
+
         'account',
+
         'secure',
-        'update'
+
+        'update',
+
+        'bank',
+
+        'signin',
+
+        'password',
+
+        'confirm',
+
+        'wallet',
+
+        'crypto',
+
+        'paypal'
+
     ]
 
-    return {
-        'url_length': len(url),
-        'num_dots': url.count('.'),
-        'has_https': 1 if url.startswith("https") else 0,
-        'num_digits': sum(c.isdigit() for c in url),
-        'num_special': sum(not c.isalnum() for c in url),
+    ip_pattern = r'(\d{1,3}\.){3}\d{1,3}'
 
-        # Advanced lexical features
-        'has_ip': has_ip,
-        'num_subdomains': max(url.count('.') - 1, 0),
+    return {
+
+        'url_length': len(url),
+
+        'num_dots': url.count('.'),
+
+        'num_digits': sum(
+            c.isdigit()
+            for c in url
+        ),
+
+        'num_special': sum(
+            not c.isalnum()
+            for c in url
+        ),
+
+        'has_ip': 1 if re.search(
+            ip_pattern,
+            hostname
+        ) else 0,
+
+        'has_hyphen': 1 if '-' in hostname else 0,
+
+        'num_subdomains': max(
+            hostname.count('.') - 1,
+            0
+        ),
 
         'has_suspicious_words': 1 if any(
+
             word in url.lower()
+
             for word in suspicious_words
-        ) else 0
+
+        ) else 0,
+
+        'uses_https': 1 if parsed.scheme == 'https' else 0
     }
 
-# Apply feature extraction
-features = data['url'].apply(extract_features)
+# =========================
+# CREATE FEATURE DATAFRAME
+# =========================
 
-# Convert features into DataFrame
+feature_rows = []
+
+for url in data['url']:
+
+    feature_rows.append(
+        extract_features(url)
+    )
+
 features_df = pd.DataFrame(
-    list(features),
-    index=data.index
+    feature_rows
 )
 
-# Combine features with labels
+# Reset indexes BEFORE concat
+
+features_df = features_df.reset_index(
+    drop=True
+)
+
+labels_df = data[['label']].reset_index(
+    drop=True
+)
+
+# Combine safely
+
 final_data = pd.concat(
-    [features_df, data['label']],
+    [features_df, labels_df],
     axis=1
 )
 
+# Final NaN cleanup
+
+final_data = final_data.dropna()
+
 # =========================
-# DATA PREPARATION
+# SPLIT FEATURES & LABELS
 # =========================
 
-X = final_data.drop('label', axis=1)
+X = final_data.drop(
+    'label',
+    axis=1
+)
+
 y = final_data['label']
 
-# Split dataset into training and testing sets
+# =========================
+# TRAIN TEST SPLIT
+# =========================
+
 X_train, X_test, y_train, y_test = train_test_split(
+
     X,
     y,
+
     test_size=0.2,
+
     random_state=42,
+
     stratify=y
 )
 
 # =========================
-# LOGISTIC REGRESSION MODEL
+# LOGISTIC REGRESSION
 # =========================
 
-lr_model = LogisticRegression(max_iter=1000)
+lr_model = LogisticRegression(
+    max_iter=1000
+)
 
-lr_model.fit(X_train, y_train)
+lr_model.fit(
+    X_train,
+    y_train
+)
 
-lr_pred = lr_model.predict(X_test)
-
-lr_accuracy = accuracy_score(y_test, lr_pred)
+lr_pred = lr_model.predict(
+    X_test
+)
 
 print("\nLogistic Regression Accuracy:")
-print(lr_accuracy)
+
+print(
+    accuracy_score(
+        y_test,
+        lr_pred
+    )
+)
 
 # =========================
-# DECISION TREE MODEL
+# DECISION TREE
 # =========================
 
 dt_model = DecisionTreeClassifier(
     random_state=42
 )
 
-dt_model.fit(X_train, y_train)
+dt_model.fit(
+    X_train,
+    y_train
+)
 
-dt_pred = dt_model.predict(X_test)
-
-dt_accuracy = accuracy_score(y_test, dt_pred)
+dt_pred = dt_model.predict(
+    X_test
+)
 
 print("\nDecision Tree Accuracy:")
-print(dt_accuracy)
+
+print(
+    accuracy_score(
+        y_test,
+        dt_pred
+    )
+)
 
 # =========================
-# RANDOM FOREST MODEL
+# RANDOM FOREST
 # =========================
 
 rf_model = RandomForestClassifier(
-    n_estimators=200,
-    max_depth=15,
+
+    n_estimators=300,
+
+    max_depth=20,
+
     min_samples_split=5,
+
     min_samples_leaf=2,
+
     class_weight='balanced',
-    random_state=42
+
+    random_state=42,
+
+    n_jobs=-1
 )
 
-rf_model.fit(X_train, y_train)
+rf_model.fit(
+    X_train,
+    y_train
+)
 
-rf_pred = rf_model.predict(X_test)
+rf_pred = rf_model.predict(
+    X_test
+)
 
-rf_accuracy = accuracy_score(y_test, rf_pred)
+# =========================
+# EVALUATION
+# =========================
 
 print("\nRandom Forest Accuracy:")
-print(rf_accuracy)
 
-# =========================
-# MODEL EVALUATION
-# =========================
+print(
+    accuracy_score(
+        y_test,
+        rf_pred
+    )
+)
 
 print("\nRandom Forest Classification Report:")
-print(classification_report(y_test, rf_pred))
+
+print(
+    classification_report(
+        y_test,
+        rf_pred
+    )
+)
 
 print("\nRandom Forest Confusion Matrix:")
-print(confusion_matrix(y_test, rf_pred))
+
+print(
+    confusion_matrix(
+        y_test,
+        rf_pred
+    )
+)
 
 # =========================
 # FEATURE IMPORTANCE
@@ -169,15 +327,25 @@ print(confusion_matrix(y_test, rf_pred))
 print("\nFeature Importance:")
 
 feature_names = X.columns
+
 importances = rf_model.feature_importances_
 
-for name, score in zip(feature_names, importances):
-    print(f"{name:<25} {score:.4f}")
+for name, score in zip(
+    feature_names,
+    importances
+):
+
+    print(
+        f"{name:<25} {score:.4f}"
+    )
 
 # =========================
-# MODEL SAVING
+# SAVE MODEL
 # =========================
 
-joblib.dump(rf_model, "model.pkl")
+joblib.dump(
+    rf_model,
+    "model.pkl"
+)
 
 print("\nModel saved as model.pkl")
