@@ -1,20 +1,12 @@
-# 🔐 Phishing URL Detection using Machine Learning
+# 🔐 Phishing URL Detection using Machine Learning and Lexical Feature Analysis
 
-## Overview
+## 📌 Overview
 
-This project detects whether a URL is legitimate or phishing using Machine Learning.
+This project detects whether a URL is **legitimate** or **phishing** using Machine Learning.
 
-The system analyzes lexical and structural URL features such as:
-- URL length
-- Special characters
-- Number of dots/subdomains
-- Digits
-- Hyphen usage
-- IP-based URLs
-- HTTPS usage
-- Suspicious phishing keywords
+The system analyzes **lexical and structural URL features** without accessing webpage content, making predictions lightweight, fast, and efficient for real-time detection.
 
-The project uses a Random Forest classifier trained on a balanced real-world phishing dataset and includes an interactive Streamlit web application for real-time predictions.
+The project includes a trained **Random Forest classifier** along with an interactive **Streamlit web application** for live phishing analysis.
 
 ---
 
@@ -35,7 +27,7 @@ The project uses a Random Forest classifier trained on a balanced real-world phi
 - Suspicious keyword detection
 - Confidence score visualization
 - Explainable phishing indicators
-- Streamlit web interface
+- Interactive Streamlit web interface
 
 ---
 
@@ -51,18 +43,20 @@ The project uses a Random Forest classifier trained on a balanced real-world phi
 
 ## 📊 Final Model Performance
 
-### Random Forest Accuracy
+### Random Forest (Final Model)
 
 | Metric | Score |
 |---|---|
 | Accuracy | 99.85% |
-| Precision | 1.00 |
-| Recall | 1.00 |
-| F1 Score | 1.00 |
+| Precision | 99.7% |
+| Recall | 99.8% |
+| F1 Score | 99.7% |
+
+The Random Forest model achieved the best overall performance and was selected for deployment in the Streamlit application.
 
 ---
 
-### 📈 Feature Importance
+## 📈 Feature Importance
 
 | Feature | Importance |
 |---|---|
@@ -75,26 +69,32 @@ The project uses a Random Forest classifier trained on a balanced real-world phi
 | IP Address Detection | 0.0109 |
 | Hyphen Detection | 0.0047 |
 
-The model primarily relies on structural URL complexity to identify phishing patterns.
+The model primarily relies on **structural URL complexity** to identify phishing patterns.
 
 ---
 
 ## ⚙️ Key Improvements
 
-### Dataset Upgrade
-- Replaced the old dataset with a cleaner balanced real-world phishing dataset
-- Reduced false positives on legitimate domains
+### ✅ Dataset Upgrade
 
-### Improved Feature Engineering
-Added:
+- Replaced the previous dataset with a cleaner balanced real-world phishing dataset
+- Reduced false positives on legitimate domains
+- Improved detection consistency for real-world URLs
+
+### ✅ Improved Feature Engineering
+
+Added advanced lexical features including:
+
 - IP address detection
 - Hyphen detection
 - Subdomain analysis
 - HTTPS detection
 - Suspicious keyword detection
 
-### Trusted Domain Whitelist
+### ✅ Trusted Domain Whitelist
+
 Integrated whitelist support for trusted domains such as:
+
 - Google
 - Microsoft
 - GitHub
@@ -102,14 +102,17 @@ Integrated whitelist support for trusted domains such as:
 - Amazon
 - NASA
 
-This prevents legitimate domains from being falsely classified as phishing.
+This helps prevent legitimate domains from being falsely classified as phishing URLs.
 
-### Enhanced Streamlit UI
+### ✅ Enhanced Streamlit UI
+
 Added:
+
 - Confidence score visualization
 - Suspicious indicator explanations
 - Cleaner prediction feedback
 - URL normalization support
+- Real-time phishing probability display
 
 ---
 
@@ -126,10 +129,12 @@ Added:
 
 ## 📂 Dataset
 
-Dataset used:
-- `phishing_url_dataset_unique.csv`
+### Dataset Used
 
-Contains:
+`phishing_url_dataset_unique.csv`
+
+### Contains
+
 - Legitimate URLs
 - Real phishing URLs
 - Balanced binary labels
@@ -138,38 +143,39 @@ Contains:
 
 ## ▶️ How to Run Locally
 
-### 1. Clone Repository
+### 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/adnandeva/phishing-url-detector.git
 cd phishing-url-detector
 ```
 
-### 2. Create Virtual Environment
+### 2️⃣ Create Virtual Environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### 3️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Train Model
+### 4️⃣ Train Model
 
 ```bash
 python3 main.py
 ```
 
 This generates:
+
 ```bash
 model.pkl
 ```
 
-### 5. Run Streamlit App
+### 5️⃣ Run Streamlit App
 
 ```bash
 streamlit run app.py
@@ -179,7 +185,7 @@ streamlit run app.py
 
 ## 📂 Project Structure
 
-```text
+```bash
 phishing-url-detector/
 │── app.py
 │── main.py
@@ -194,30 +200,54 @@ phishing-url-detector/
 
 ## 🧪 Example Test URLs
 
-### Safe URLs
-- https://google.com
-- https://github.com
-- https://support.microsoft.com
+### ✅ Safe URLs
 
-### Phishing-like URLs
-- http://paypal-login-verification-secure.com
-- https://google.com.secure-login.xyz
-- http://192.168.1.5/login.php
+```text
+https://google.com
+https://github.com
+https://support.microsoft.com
+https://www.apple.com
+```
+
+### 🚨 Phishing-like URLs
+
+```text
+http://paypal-login-verification-secure.com
+https://google.com.secure-login.xyz
+http://192.168.1.5/login.php
+```
 
 ---
 
 ## 📌 Future Improvements
 
-- WHOIS/domain age analysis
+- WHOIS / domain age analysis
 - VirusTotal API integration
 - Advanced ensemble models
 - SHAP explainability
-- UI/UX enhancements
+- Improved UI/UX
+- Live blacklist integration
 
 ---
 
 ## 👤 Author
 
-Adnan Riyaz  
+### Adnan Riyaz
+
 Pre-Final Year Computer Science Student  
 Ramaiah University of Applied Sciences
+
+---
+
+## ⭐ Acknowledgment
+
+This project was built for learning, experimentation, and improving practical understanding of:
+
+- Cybersecurity
+- Phishing detection
+- Feature engineering
+- Machine Learning deployment
+- Streamlit application development
+
+Because apparently humans now need machine learning to tell them that  
+`google-login-secure-paypal-free-money.xyz` might be suspicious.
