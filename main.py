@@ -1,26 +1,55 @@
+import re
+import joblib
 import pandas as pd
 
-# Step 1: Load dataset
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix
+)
+
+# =========================
+# DATA LOADING
+# =========================
+
 data = pd.read_csv("dataset/malicious_phish.csv")
 
-# Step 2: Reduce size (keep it manageable)
+# Reduce dataset size for faster training
 data = data.sample(20000, random_state=42)
 
-# Step 3: Convert labels
-# benign → 0 (safe)
-# others → 1 (malicious)
-data['label'] = data['type'].apply(lambda x: 0 if x == 'benign' else 1)
+# Convert labels:
+# benign -> 0 (safe)
+# others -> 1 (malicious)
+data['label'] = data['type'].apply(
+    lambda x: 0 if x == 'benign' else 1
+)
 
-# Step 4: Keep only required columns
+# Keep only required columns
 data = data[['url', 'label']]
 
-# Check output
-#print(data.head())
-#print(data.shape)
-
-# Step 5: Feature extraction
+# =========================
+# FEATURE EXTRACTION
+# =========================
 
 def extract_features(url):
+
+    # Detect IP-based URLs
+    ip_pattern = r'\d+\.\d+\.\d+\.\d+'
+    has_ip = 1 if re.search(ip_pattern, url) else 0
+
+    # Suspicious phishing keywords
+    suspicious_words = [
+        'login',
+        'verify',
+        'account',
+        'secure',
+        'update'
+    ]
+
     return {
         'url_length': len(url),
         'num_dots': url.count('.'),
@@ -28,85 +57,88 @@ def extract_features(url):
         'num_digits': sum(c.isdigit() for c in url),
         'num_special': sum(not c.isalnum() for c in url),
 
-        # NEW FEATURES
-        'has_ip': 1 if any(char.isdigit() for char in url.split('/')[0]) else 0,
-        'num_subdomains': url.count('.') - 1,
-        'has_suspicious_words': 1 if any(word in url.lower() for word in ['login', 'verify', 'account', 'secure', 'update']) else 0
+        # Advanced lexical features
+        'has_ip': has_ip,
+        'num_subdomains': max(url.count('.') - 1, 0),
+
+        'has_suspicious_words': 1 if any(
+            word in url.lower()
+            for word in suspicious_words
+        ) else 0
     }
 
 # Apply feature extraction
 features = data['url'].apply(extract_features)
 
-# Convert to DataFrame
-features_df = pd.DataFrame(list(features), index=data.index)
+# Convert features into DataFrame
+features_df = pd.DataFrame(
+    list(features),
+    index=data.index
+)
 
-# Combine with labels
-final_data = pd.concat([features_df, data['label']], axis=1)
+# Combine features with labels
+final_data = pd.concat(
+    [features_df, data['label']],
+    axis=1
+)
 
-#print(final_data.head())
-#print(final_data.shape)
-
-# Step 6: Separate features and label
+# =========================
+# DATA PREPARATION
+# =========================
 
 X = final_data.drop('label', axis=1)
 y = final_data['label']
 
-# Check
-#print("Features (X):")
-#print(X.head())
-
-#print("\nLabels (y):")
-#print(y.head())
-
-# Step 7: Train-test split
-
-from sklearn.model_selection import train_test_split
-
+# Split dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
 )
 
-# Check
-#print("Training set size:", X_train.shape)
-#print("Testing set size:", X_test.shape)
+# =========================
+# LOGISTIC REGRESSION MODEL
+# =========================
 
-# Step 8: Train model
+lr_model = LogisticRegression(max_iter=1000)
 
-from sklearn.linear_model import LogisticRegression
+lr_model.fit(X_train, y_train)
 
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
+lr_pred = lr_model.predict(X_test)
 
-# Step 9: Predict
+lr_accuracy = accuracy_score(y_test, lr_pred)
 
-y_pred = model.predict(X_test)
+print("\nLogistic Regression Accuracy:")
+print(lr_accuracy)
 
-# Step 10: Check accuracy
+# =========================
+# DECISION TREE MODEL
+# =========================
 
-from sklearn.metrics import accuracy_score
+dt_model = DecisionTreeClassifier(
+    random_state=42
+)
 
-accuracy = accuracy_score(y_test, y_pred)
-print("Model Accuracy:", accuracy)
+dt_model.fit(X_train, y_train)
 
-# Step 11: Detailed evaluation
+dt_pred = dt_model.predict(X_test)
 
-from sklearn.metrics import classification_report, confusion_matrix
+dt_accuracy = accuracy_score(y_test, dt_pred)
 
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
+print("\nDecision Tree Accuracy:")
+print(dt_accuracy)
 
-print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
-
-# Step 12: Random Forest model (tuned + balanced)
-
-from sklearn.ensemble import RandomForestClassifier
+# =========================
+# RANDOM FOREST MODEL
+# =========================
 
 rf_model = RandomForestClassifier(
-    n_estimators=200,        # more trees = better learning
-    max_depth=15,            # prevent overfitting
-    min_samples_split=5,     # avoid overly specific splits
-    min_samples_leaf=2,      # smoother decisions
+    n_estimators=200,
+    max_depth=15,
+    min_samples_split=5,
+    min_samples_leaf=2,
     class_weight='balanced',
     random_state=42
 )
@@ -115,10 +147,14 @@ rf_model.fit(X_train, y_train)
 
 rf_pred = rf_model.predict(X_test)
 
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-
 rf_accuracy = accuracy_score(y_test, rf_pred)
-print("\nRandom Forest Accuracy:", rf_accuracy)
+
+print("\nRandom Forest Accuracy:")
+print(rf_accuracy)
+
+# =========================
+# MODEL EVALUATION
+# =========================
 
 print("\nRandom Forest Classification Report:")
 print(classification_report(y_test, rf_pred))
@@ -126,19 +162,9 @@ print(classification_report(y_test, rf_pred))
 print("\nRandom Forest Confusion Matrix:")
 print(confusion_matrix(y_test, rf_pred))
 
-# Step 13: Decision Tree model
-
-from sklearn.tree import DecisionTreeClassifier
-
-dt = DecisionTreeClassifier(random_state=42)
-dt.fit(X_train, y_train)
-
-y_pred_dt = dt.predict(X_test)
-
-from sklearn.metrics import accuracy_score
-print("\nDecision Tree Accuracy:", accuracy_score(y_test, y_pred_dt))
-
-# Step 14: Feature Importance
+# =========================
+# FEATURE IMPORTANCE
+# =========================
 
 print("\nFeature Importance:")
 
@@ -146,13 +172,12 @@ feature_names = X.columns
 importances = rf_model.feature_importances_
 
 for name, score in zip(feature_names, importances):
-    print(f"{name}: {score:.4f}")
+    print(f"{name:<25} {score:.4f}")
 
-# Step 15: Save trained model
-
-import joblib
+# =========================
+# MODEL SAVING
+# =========================
 
 joblib.dump(rf_model, "model.pkl")
-print("Model saved as model.pkl")
 
-
+print("\nModel saved as model.pkl")
